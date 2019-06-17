@@ -35,18 +35,22 @@ func main() {
 		log.Fatalf("Missing required --host parameter")
 	}
 
-	if err := os.Mkdir("certs", 0700); err != nil {
-		log.Fatalf("Failed to create directory")
-	}
-
 	ex, err := os.Executable()
 	if err != nil {
 		log.Fatalf("Failed to get executable")
 	}
 
 	path := filepath.Dir(ex)
+	if _, err := os.Stat(path + "/" + "certs"); !os.IsNotExist(err) {
+		if err := os.Remove(path + "/" + "certs"); err != nil {
+			log.Fatalf("Failed to remove already existing certs")
+		}
+	}
 
-	fmt.Printf("%v", path)
+	if err := os.Mkdir("certs", 0700); err != nil {
+		log.Fatalf("Failed to create directory")
+	}
+
 	if err := os.Chdir(path + "/" + "certs"); err != nil {
 		log.Fatalf("Failed to change directory")
 	}
@@ -158,7 +162,7 @@ func createPrivateKey(ec string) (interface{}, error) {
 		log.Fatalf("error closing key.pem: %s", err)
 	}
 
-	log.Print("wrote key.pem\n")
+	log.Printf("wrote key.pem\n")
 
 	return priv, nil
 }
